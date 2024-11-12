@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query, Render } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Query, Render } from '@nestjs/common';
 import { AppService } from './app.service';
 import { log } from 'console';
 
@@ -21,7 +21,9 @@ export class AppController {
   ]
   @Get('sutik')
   sutemenyekListazas() {
-    return this.sutik;
+    return this.sutik
+    .map((suti, idx) => {return {id: idx, name: suti}})
+    .filter(suti => suti.name != null);
   }
 
   @Get('sutik/:sutiid')
@@ -38,4 +40,13 @@ export class AppController {
     }
     return this.sutik.filter(suti => suti.toLocaleLowerCase().includes(kereses.toLocaleLowerCase()))
   }
+
+  @Delete('sutik/:sutiid')
+  sutiTorles(@Param('sutiid') id: string){
+    const idSzam = parseInt(id);
+    this.sutik[idSzam] = null;
+
+
+  }
+
 }
