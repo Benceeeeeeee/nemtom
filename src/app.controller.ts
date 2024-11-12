@@ -1,7 +1,9 @@
-import { Body, Controller, Delete, Get, Param, Post, Query, Render } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Render } from '@nestjs/common';
 import { AppService } from './app.service';
 import { log } from 'console';
 import { Sutemeny } from './sutemeny';
+import { CreateSutemenyDto } from './create-sutemeny.dto';
+import { UpdateSutiAdatok } from './updateSutemeny.dto';
 
 @Controller()
 export class AppController {
@@ -69,7 +71,7 @@ export class AppController {
   }
 
   @Post('ujSuti')
-  ujSuti(@Body() ujSutiAdatok: Sutemeny){
+  ujSuti(@Body() ujSutiAdatok: CreateSutemenyDto){
     const ujSutemeny: Sutemeny = {
       id: this.nextId,
       nev: ujSutiAdatok.nev,
@@ -79,5 +81,19 @@ export class AppController {
     this.nextId++;
     this.sutik.push(ujSutemeny);
     return ujSutemeny;
+  }
+
+  @Patch('sutiModositas/:sutiid')
+  sutiModositas(@Param('sutiid') id: string, @Body() sutiAdatok: UpdateSutiAdatok){
+    const idSzam = parseInt(id);
+    const eredetiSutiid = this.sutik.findIndex(suti => suti.id == idSzam);
+    const eredetiSuti = this.sutik[eredetiSutiid];
+
+    const ujSuti: Sutemeny = {
+      ...eredetiSuti,
+      ...sutiAdatok,
+    };
+    this.sutik[eredetiSutiid] = ujSuti;
+    return ujSuti;
   }
 }

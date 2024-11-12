@@ -1,5 +1,5 @@
 export class CreateSutemenyDto{
     nev: string;
-    laktozmentes: boolean;
+    laktozMentes: boolean;
     db: number;
 }
