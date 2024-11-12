@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Render } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, NotFoundException, Param, Patch, Post, Query, Render } from '@nestjs/common';
 import { AppService } from './app.service';
 import { log } from 'console';
 import { Sutemeny } from './sutemeny';
@@ -49,8 +49,13 @@ export class AppController {
   @Get('sutik/:sutiid')
   sutemenyIdAlapjan(@Param('sutiid') id: string) {
     const idSzam = parseInt(id);
+    const suti = this.sutik.findIndex(suti => suti.id == idSzam);
 
-    return this.sutik.find(suti =>suti.id == idSzam);
+    if(!suti){
+      throw new NotFoundException("Nincs ilyen ID-jű süti");
+    }
+
+    return suti;
   }
 
   @Get('sutiKereses')
@@ -62,6 +67,7 @@ export class AppController {
   }
 
   @Delete('sutik/:sutiid')
+  @HttpCode(204)
   sutiTorles(@Param('sutiid') id: string) {
     const idSzam = parseInt(id);
     const idx = this.sutik.findIndex(suti =>suti.id == idSzam)
@@ -73,10 +79,8 @@ export class AppController {
   @Post('ujSuti')
   ujSuti(@Body() ujSutiAdatok: CreateSutemenyDto){
     const ujSutemeny: Sutemeny = {
+      ...ujSutiAdatok,
       id: this.nextId,
-      nev: ujSutiAdatok.nev,
-      laktozMentes: ujSutiAdatok.laktozMentes,
-      db: ujSutiAdatok.db
     }
     this.nextId++;
     this.sutik.push(ujSutemeny);
