@@ -1,6 +1,7 @@
-import { Controller, Delete, Get, Param, Query, Render } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Query, Render } from '@nestjs/common';
 import { AppService } from './app.service';
 import { log } from 'console';
+import { Sutemeny } from './sutemeny';
 
 @Controller()
 export class AppController {
@@ -14,39 +15,69 @@ export class AppController {
     };
   }
 
-  sutik = [
-    'Palacsinta',
-    'Tiramisu',
-    'Krémes',
+  sutik: Sutemeny[] = [
+    {
+      id: 1,
+      nev: 'Palacsinta',
+      laktozMentes: true,
+      db: 5,
+    },
+    {
+      id: 2,
+      nev: 'Tiramisu',
+      laktozMentes: false,
+      db: 10,
+    },
+    {
+      id: 4,
+      nev: 'Krémes',
+      laktozMentes: true,
+      db: 0,
+    }
   ]
+  nextId = 5;
+
   @Get('sutik')
   sutemenyekListazas() {
     return this.sutik
-    .map((suti, idx) => {return {id: idx, name: suti}})
-    .filter(suti => suti.name != null);
+      //.map((suti, idx) => { return { id: idx, name: suti } })
+      //.filter(suti => suti.name != null);
   }
 
   @Get('sutik/:sutiid')
   sutemenyIdAlapjan(@Param('sutiid') id: string) {
     const idSzam = parseInt(id);
 
-    return this.sutik[idSzam];
+    return this.sutik.find(suti =>suti.id == idSzam);
   }
 
   @Get('sutiKereses')
-  sutemenyKereses(@Query('kereses') kereses?: string){
-    if(!kereses){
+  sutemenyKereses(@Query('kereses') kereses?: string) {
+    if (!kereses) {
       return this.sutik
     }
-    return this.sutik.filter(suti => suti.toLocaleLowerCase().includes(kereses.toLocaleLowerCase()))
+    return this.sutik.filter(suti => suti.nev.toLocaleLowerCase().includes(kereses.toLocaleLowerCase()))
   }
 
   @Delete('sutik/:sutiid')
-  sutiTorles(@Param('sutiid') id: string){
+  sutiTorles(@Param('sutiid') id: string) {
     const idSzam = parseInt(id);
-    this.sutik[idSzam] = null;
+    const idx = this.sutik.findIndex(suti =>suti.id == idSzam)
+    this.sutik.splice(idx);
 
-
+    //this.sutik[idSzam] = null;
   }
 
+  @Post('ujSuti')
+  ujSuti(@Body() ujSutiAdatok: Sutemeny){
+    const ujSutemeny: Sutemeny = {
+      id: this.nextId,
+      nev: ujSutiAdatok.nev,
+      laktozMentes: ujSutiAdatok.laktozMentes,
+      db: ujSutiAdatok.db
+    }
+    this.nextId++;
+    this.sutik.push(ujSutemeny);
+    return ujSutemeny;
+  }
 }
